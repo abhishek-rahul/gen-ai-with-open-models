@@ -1,0 +1,30 @@
+Spring Boot Configuration Guide
+
+Spring Boot uses a powerful externalized configuration system. Configuration
+properties can be defined in multiple sources with a well-defined precedence order.
+
+Profiles allow you to segregate configuration for different environments.
+Using application-{profile}.yml files, you can define environment-specific
+settings. For example:
+- application-dev.yml for development settings
+- application-prod.yml for production settings
+- application-test.yml for test settings
+
+Activate profiles using:
+  spring.profiles.active=dev
+
+Or via command line:
+  java -jar app.jar --spring.profiles.active=prod
+
+Configuration properties can be bound to Java objects using @ConfigurationProperties.
+This provides type-safe configuration with validation support.
+
+Example:
+@ConfigurationProperties(prefix = "app.datasource")
+public record DataSourceConfig(String url, String username, int poolSize) {}
+
+Environment variables override application.yml values. Spring Boot automatically
+maps UPPER_CASE_ENV_VARS to lower.case.property.names.
+
+For sensitive values, use Spring Cloud Config Server or Azure Key Vault
+integration to avoid storing secrets in configuration files.

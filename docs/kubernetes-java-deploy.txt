@@ -1,0 +1,33 @@
+Kubernetes Deployment Guide for Java Applications
+
+Container Image Best Practices:
+- Use Eclipse Temurin or Microsoft Build of OpenJDK as your base image
+- Use multi-stage Docker builds to minimize image size
+- Set JVM memory limits explicitly with -XX:MaxRAMPercentage=75
+- Enable container-aware JVM settings (default in Java 17+)
+
+Example Dockerfile for Spring Boot:
+  FROM eclipse-temurin:21-jre-alpine
+  COPY target/*.jar app.jar
+  ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "app.jar"]
+
+Kubernetes Resource Configuration:
+- Always set resource requests and limits
+- Recommended starting point for Spring Boot microservice:
+  requests: cpu=250m, memory=512Mi
+  limits: cpu=1000m, memory=1Gi
+
+Health Checks:
+- Configure liveness probe at /actuator/health/liveness
+- Configure readiness probe at /actuator/health/readiness
+- Set initialDelaySeconds to 30 for Spring Boot apps (startup time)
+
+Scaling:
+- Use Horizontal Pod Autoscaler (HPA) based on CPU or custom metrics
+- For Java apps, consider scaling on request latency (p99) rather than CPU
+- Virtual threads (Java 21) can dramatically reduce the need for horizontal scaling
+
+Service Mesh Integration:
+- Istio and Linkerd work well with Spring Boot
+- Enable mTLS for service-to-service communication
+- Use circuit breakers via Resilience4j or service mesh policies

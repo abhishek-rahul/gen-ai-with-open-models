@@ -1,0 +1,17 @@
+Java 21 LTS introduces several key features:
+
+Virtual Threads (JEP 444): Lightweight threads that dramatically reduce the cost
+of concurrent programming. Virtual threads are managed by the JVM rather than the
+OS, allowing millions of concurrent threads.
+
+Record Patterns (JEP 440): Extends pattern matching to destructure record values,
+enabling concise and type-safe data extraction.
+
+String Templates (Preview - JEP 430): Allows embedding expressions directly in
+strings for safer string composition.
+
+Sequenced Collections (JEP 431): New interfaces for collections with a defined
+encounter order, adding first(), last(), and reversed() methods.
+
+The minimum recommended heap size for Java 21 applications is 256 MB for
+microservices and 512 MB for typical web applications.
