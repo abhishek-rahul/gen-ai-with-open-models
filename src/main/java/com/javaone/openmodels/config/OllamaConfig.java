@@ -3,7 +3,9 @@ package com.javaone.openmodels.config;
 import com.javaone.openmodels.service.Assistant;
 import com.javaone.openmodels.service.InventoryTools;
 import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,16 @@ public class OllamaConfig {
     @Bean
     ChatLanguageModel chatModel() {
         return OllamaChatModel.builder()
+            .baseUrl(baseUrl)
+            .modelName(chatModelName)
+            .temperature(0.7)
+            .timeout(Duration.ofSeconds(120))
+            .build();
+    }
+
+    @Bean
+    StreamingChatLanguageModel streamingChatModel() {
+        return OllamaStreamingChatModel.builder()
             .baseUrl(baseUrl)
             .modelName(chatModelName)
             .temperature(0.7)

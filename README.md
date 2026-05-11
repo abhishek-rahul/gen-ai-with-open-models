@@ -38,6 +38,21 @@ Chat with the model:
 curl "http://localhost:8080/chat?message=What+is+the+Java+record+keyword?"
 ```
 
+Normal JSON response with total latency:
+```bash
+curl "http://localhost:8080/chat/normal?message=What+is+streaming+in+LLMs?"
+```
+
+Token-by-token Server-Sent Events streaming:
+```bash
+curl -N "http://localhost:8080/chat/stream?message=Explain+Java+virtual+threads+in+5+bullets"
+```
+
+Browser chat UI:
+```text
+http://localhost:8080/chat.html
+```
+
 Tool calling (inventory lookup — uses `/chat/tools` endpoint):
 ```bash
 curl "http://localhost:8080/chat/tools?message=How+many+units+of+JDK-21+do+we+have+in+stock?"
@@ -90,6 +105,9 @@ curl -X POST "http://localhost:8080/evaluate"
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/chat?message=...` | Chat with LLM (Demo 1) |
+| GET | `/chat/normal?message=...` | Non-streaming chat response with total latency |
+| GET | `/chat/stream?message=...` | SSE token stream with first-token and total latency events |
+| GET | `/chat.html` | Browser UI for comparing normal and streaming chat |
 | GET | `/chat/tools?message=...` | Chat with tool calling (Demo 1) |
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
