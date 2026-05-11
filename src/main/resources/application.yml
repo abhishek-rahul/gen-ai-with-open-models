@@ -18,3 +18,7 @@ rag:
   chunk-overlap: 50
   max-results: 5
   min-score: 0.7
+
+# Structured output configuration
+structured:
+  max-retries: 2
