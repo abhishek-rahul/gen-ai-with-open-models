@@ -26,7 +26,7 @@ curl -fsSL https://ollama.com/install.sh | sh
 ### 2. Pull Models (Do This Ahead of Time — Downloads Are Large)
 
 ```bash
-ollama pull llama3.1:8b        # ~4.7 GB (Q4 quantized)
+ollama pull qwen2.5:0.5b        # ~4.7 GB (Q4 quantized)
 ollama pull mistral:7b         # ~4.1 GB
 ollama pull nomic-embed-text   # ~274 MB (embedding model for Demo 2)
 ```
@@ -35,7 +35,7 @@ ollama pull nomic-embed-text   # ~274 MB (embedding model for Demo 2)
 
 ```bash
 ollama list
-# Should show: llama3.1:8b, mistral:7b, nomic-embed-text
+# Should show: qwen2.5:0.5b, mistral:7b, nomic-embed-text
 
 curl http://localhost:11434/api/tags | python3 -m json.tool
 # Should return JSON with model list
@@ -105,7 +105,7 @@ ollama list
 
 ```
 NAME                   ID             SIZE     MODIFIED
-llama3.1:8b            <hash>         4.7 GB   2 hours ago
+qwen2.5:0.5b           <hash>         4.7 GB   2 hours ago
 mistral:7b             <hash>         4.1 GB   2 hours ago
 nomic-embed-text       <hash>         274 MB   2 hours ago
 ```

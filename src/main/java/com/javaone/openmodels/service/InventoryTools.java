@@ -11,7 +11,7 @@ public class InventoryTools {
     public String checkStock(@P("Product SKU") String sku) {
         // Simulated inventory lookup
         Map<String, Integer> inventory = Map.of(
-            "JDK-21", 150, "MVN-4", 89, "GRAAL-22", 12
+            "JDK-21", 150, "MVN-4", 89, "GRAAL-22", 12 , "jdk-21", 151
         );
         Integer qty = inventory.get(sku);
         return qty != null

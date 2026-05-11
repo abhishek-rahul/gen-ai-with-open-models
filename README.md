@@ -13,7 +13,7 @@ JavaOne 2026 Demo Project — Local inference with Ollama + LangChain4j, RAG pip
 ### 1. Pull the required models
 
 ```bash
-ollama pull llama3.1:8b
+ollama pull qwen2.5:0.5b
 ollama pull mistral:7b
 ollama pull nomic-embed-text
 ```

@@ -47,7 +47,7 @@ public class RagController {
 
         return Map.of(
             "answer", answer,
-            "model", "llama3.1:8b",
+            "model", "qwen2.5:0.5b",
             "latency_ms", latency
         );
     }

@@ -93,7 +93,7 @@ public class RagEvaluator {
 
         int n = testSet.size();
         return Map.of(
-            "model", "llama3.1:8b",
+            "model", "qwen2.5:0.5b",
             "test_cases", n,
             "results", Map.of(
                 "faithfulness", Math.round(totalFaithfulness / n * 100.0) / 100.0,
