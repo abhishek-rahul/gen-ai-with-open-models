@@ -18,15 +18,18 @@ public class DocumentIngestor {
 
     private final EmbeddingModel embeddingModel;
     private final EmbeddingStore<TextSegment> embeddingStore;
+    private final String embeddingModelName;
     private final int chunkSize;
     private final int chunkOverlap;
 
     public DocumentIngestor(EmbeddingModel embeddingModel,
                             EmbeddingStore<TextSegment> embeddingStore,
+                            @Value("${ollama.embedding-model}") String embeddingModelName,
                             @Value("${rag.chunk-size}") int chunkSize,
                             @Value("${rag.chunk-overlap}") int chunkOverlap) {
         this.embeddingModel = embeddingModel;
         this.embeddingStore = embeddingStore;
+        this.embeddingModelName = embeddingModelName;
         this.chunkSize = chunkSize;
         this.chunkOverlap = chunkOverlap;
     }
@@ -44,7 +47,7 @@ public class DocumentIngestor {
 
         ingestor.ingest(documents);
 
-        return new IngestResult(documents.size(), "nomic-embed-text", "in-memory");
+        return new IngestResult(documents.size(), embeddingModelName, "in-memory");
     }
 
     public record IngestResult(int documentsIngested, String embeddingModel, String store) {}

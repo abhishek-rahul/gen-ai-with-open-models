@@ -62,6 +62,39 @@ curl "http://localhost:8080/ask?question=What+are+virtual+threads+in+Java+21?"
 curl -X POST "http://localhost:8080/evaluate"
 ```
 
+## Demo 3: Embeddings
+
+See the embedding concepts covered by the demo:
+```bash
+curl "http://localhost:8080/embeddings"
+```
+
+Convert text into a vector and inspect its dimensions:
+```bash
+curl "http://localhost:8080/embeddings/text?text=Java+virtual+threads+are+lightweight"
+```
+
+Compare a query embedding with a document embedding:
+```bash
+curl "http://localhost:8080/embeddings/compare?query=What+are+virtual+threads%3F&document=Virtual+threads+are+lightweight+JVM+threads+introduced+in+Java+21"
+```
+
+Run semantic similarity search across ad-hoc documents:
+```bash
+curl -X POST "http://localhost:8080/embeddings/search" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "query": "How does Spring Boot configuration work?",
+    "documents": [
+      "Spring Boot supports application.yml and profile-specific configuration files.",
+      "Java virtual threads are lightweight threads managed by the JVM.",
+      "Kubernetes can deploy Java services with containers and health checks."
+    ],
+    "maxResults": 3,
+    "minScore": 0.0
+  }'
+```
+
 ## Project Structure
 
 ```
@@ -77,10 +110,12 @@ curl -X POST "http://localhost:8080/evaluate"
     │   └── RagConfig.java             # Embedding model, store, RAG assistant
     ├── controller/
     │   ├── ChatController.java        # GET /chat, GET /chat/tools
+    │   ├── EmbeddingController.java   # Embedding concepts, vectors, compare, search
     │   └── RagController.java         # POST /ingest, GET /ask, POST /evaluate
     └── service/
         ├── Assistant.java             # AI Service interface
         ├── DocumentIngestor.java      # Document loading, splitting, embedding
+        ├── EmbeddingLearningService.java # Embedding demo logic
         ├── InventoryTools.java        # @Tool example for Demo 1
         └── RagEvaluator.java          # Golden test set evaluation
 ```
@@ -94,6 +129,10 @@ curl -X POST "http://localhost:8080/evaluate"
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
+| GET | `/embeddings` | Explain embedding concepts (Demo 3) |
+| GET | `/embeddings/text?text=...` | Convert text to vector and show dimensions |
+| GET | `/embeddings/compare?query=...&document=...` | Compare query and document embeddings |
+| POST | `/embeddings/search` | Run similarity search over provided documents |
 
 ## Demo Script References
 
