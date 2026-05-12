@@ -47,6 +47,11 @@ To swap models, change `ollama.chat-model` in `src/main/resources/application.ym
 
 ## Demo 2: RAG Pipeline + Evaluation
 
+Start Elasticsearch for the vector database:
+```bash
+docker compose up -d elasticsearch
+```
+
 ### Ingest documents into the vector store:
 ```bash
 curl -X POST "http://localhost:8080/ingest"
@@ -60,6 +65,13 @@ curl "http://localhost:8080/ask?question=What+are+virtual+threads+in+Java+21?"
 ### Run quality evaluation:
 ```bash
 curl -X POST "http://localhost:8080/evaluate"
+```
+
+### Inspect vector search directly:
+```bash
+curl "http://localhost:8080/vector/index"
+curl "http://localhost:8080/vector/search?query=What+are+virtual+threads?&topK=3&scoreThreshold=0.7"
+curl "http://localhost:8080/vector/search?query=heap+size&metadataKey=file_name&metadataValue=java21-features.txt"
 ```
 
 ## Project Structure
@@ -93,9 +105,12 @@ curl -X POST "http://localhost:8080/evaluate"
 | GET | `/chat/tools?message=...` | Chat with tool calling (Demo 1) |
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
+| GET | `/vector/index` | Show Elasticsearch vector index and retrieval settings |
+| GET | `/vector/search?query=...` | Similarity search with topK, score threshold, and metadata filtering |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
 
 ## Demo Script References
 
 - [Demo 1: Local Inference with Ollama + LangChain4j](JavaOne_Demo1_Local_Inference_Ollama_LangChain4j.md)
 - [Demo 2: RAG Pipeline with Quality Evaluation](JavaOne_Demo2_RAG_Pipeline_Evaluation.md)
+- [Demo 3: Vector Database with Elasticsearch](JavaOne_Demo3_Vector_Database_Elasticsearch.md)

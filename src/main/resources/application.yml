@@ -18,3 +18,16 @@ rag:
   chunk-overlap: 50
   max-results: 5
   min-score: 0.7
+
+# Vector database configuration
+vector-store:
+  type: elasticsearch # elasticsearch | in-memory
+  abstraction: LangChain4j EmbeddingStore; Spring AI equivalent is VectorStore
+  elasticsearch:
+    url: http://localhost:9200
+    index-name: javaone-rag-vectors
+    api-key:
+    username:
+    password:
+    dimensions: 768 # nomic-embed-text dense vector dimension
+    num-candidates: 100 # HNSW candidate pool for approximate kNN
