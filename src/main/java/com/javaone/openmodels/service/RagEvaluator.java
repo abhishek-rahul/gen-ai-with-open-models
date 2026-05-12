@@ -1,12 +1,8 @@
 package com.javaone.openmodels.service;
 
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.rag.content.Content;
-import dev.langchain4j.rag.content.retriever.ContentRetriever;
-import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
-import dev.langchain4j.rag.query.Query;
-import dev.langchain4j.store.embedding.EmbeddingStore;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.vectorstore.SearchRequest;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -37,14 +33,19 @@ public class RagEvaluator {
         )
     );
 
-    private final Assistant ragAssistant;
-    private final ContentRetriever contentRetriever;
+    private final SpringAiBasicsService springAi;
+    private final VectorStore vectorStore;
+    private final int maxResults;
+    private final double minScore;
 
-    public RagEvaluator(
-            @org.springframework.beans.factory.annotation.Qualifier("ragAssistant") Assistant ragAssistant,
-            ContentRetriever contentRetriever) {
-        this.ragAssistant = ragAssistant;
-        this.contentRetriever = contentRetriever;
+    public RagEvaluator(SpringAiBasicsService springAi,
+                        VectorStore vectorStore,
+                        @Value("${rag.max-results}") int maxResults,
+                        @Value("${rag.min-score}") double minScore) {
+        this.springAi = springAi;
+        this.vectorStore = vectorStore;
+        this.maxResults = maxResults;
+        this.minScore = minScore;
     }
 
     public Map<String, Object> evaluate() {
@@ -57,35 +58,28 @@ public class RagEvaluator {
 
         for (EvalCase tc : testSet) {
             long start = System.currentTimeMillis();
-            String answer = ragAssistant.chat(tc.question());
+            String answer = springAi.askWithRag(tc.question(), "evaluation");
             long latency = System.currentTimeMillis() - start;
 
-            // Retrieve the context that was used
-            List<Content> retrievedContents = contentRetriever.retrieve(new Query(tc.question()));
-
-            // Simple faithfulness: does the answer contain key terms from the expected answer?
+            List<Document> retrievedDocuments = retrieve(tc.question());
             double faithfulness = computeFaithfulness(answer, tc.expectedAnswer());
-
-            // Simple relevance: does the answer address the question?
             double relevance = computeRelevance(answer, tc.question());
-
-            // Context precision: are the retrieved chunks relevant?
-            double contextPrecision = computeContextPrecision(retrievedContents, tc.question());
-
-            // Source accuracy: did the right source get retrieved?
-            boolean correctSource = checkSourceAccuracy(retrievedContents, tc.expectedSource());
+            double contextPrecision = computeContextPrecision(retrievedDocuments, tc.question());
+            boolean correctSource = checkSourceAccuracy(retrievedDocuments, tc.expectedSource());
 
             totalFaithfulness += faithfulness;
             totalRelevance += relevance;
             totalContextPrecision += contextPrecision;
-            if (correctSource) correctSources++;
+            if (correctSource) {
+                correctSources++;
+            }
             totalLatency += latency;
 
             details.add(Map.of(
                 "question", tc.question(),
                 "answer", answer,
-                "faithfulness", Math.round(faithfulness * 100.0) / 100.0,
-                "relevance", Math.round(relevance * 100.0) / 100.0,
+                "faithfulness", round(faithfulness),
+                "relevance", round(relevance),
                 "correct_source", correctSource,
                 "latency_ms", latency
             ));
@@ -96,18 +90,26 @@ public class RagEvaluator {
             "model", "qwen2.5:0.5b",
             "test_cases", n,
             "results", Map.of(
-                "faithfulness", Math.round(totalFaithfulness / n * 100.0) / 100.0,
-                "answer_relevance", Math.round(totalRelevance / n * 100.0) / 100.0,
-                "context_precision", Math.round(totalContextPrecision / n * 100.0) / 100.0,
-                "source_accuracy", Math.round((double) correctSources / n * 100.0) / 100.0,
+                "faithfulness", round(totalFaithfulness / n),
+                "answer_relevance", round(totalRelevance / n),
+                "context_precision", round(totalContextPrecision / n),
+                "source_accuracy", round((double) correctSources / n),
                 "average_latency_ms", totalLatency / n
             ),
             "details", details
         );
     }
 
+    private List<Document> retrieve(String question) {
+        SearchRequest searchRequest = SearchRequest.builder()
+            .query(question)
+            .topK(maxResults)
+            .similarityThreshold(minScore)
+            .build();
+        return vectorStore.similaritySearch(searchRequest);
+    }
+
     private double computeFaithfulness(String answer, String expectedAnswer) {
-        // Simple keyword overlap metric
         String[] expectedWords = expectedAnswer.toLowerCase().split("\\s+");
         long matchCount = 0;
         String lowerAnswer = answer.toLowerCase();
@@ -120,7 +122,6 @@ public class RagEvaluator {
     }
 
     private double computeRelevance(String answer, String question) {
-        // Simple: check if answer contains key nouns from the question
         String[] questionWords = question.toLowerCase().split("\\s+");
         long matchCount = 0;
         String lowerAnswer = answer.toLowerCase();
@@ -132,31 +133,39 @@ public class RagEvaluator {
         return questionWords.length > 0 ? Math.min(1.0, (double) matchCount / questionWords.length * 1.5) : 0.0;
     }
 
-    private double computeContextPrecision(List<Content> contents, String question) {
-        if (contents.isEmpty()) return 0.0;
+    private double computeContextPrecision(List<Document> documents, String question) {
+        if (documents.isEmpty()) {
+            return 0.0;
+        }
         String lowerQuestion = question.toLowerCase();
-        long relevantCount = contents.stream()
-            .filter(c -> {
-                String text = c.textSegment().text().toLowerCase();
+        long relevantCount = documents.stream()
+            .filter(document -> {
+                String text = document.getText().toLowerCase();
                 String[] questionWords = lowerQuestion.split("\\s+");
                 long matches = 0;
-                for (String w : questionWords) {
-                    if (w.length() > 3 && text.contains(w)) matches++;
+                for (String word : questionWords) {
+                    if (word.length() > 3 && text.contains(word)) {
+                        matches++;
+                    }
                 }
                 return matches >= 2;
             })
             .count();
-        return (double) relevantCount / contents.size();
+        return (double) relevantCount / documents.size();
     }
 
-    private boolean checkSourceAccuracy(List<Content> contents, String expectedSource) {
-        return contents.stream()
-            .anyMatch(c -> {
-                String sourceName = c.textSegment().metadata().getString("file_name");
+    private boolean checkSourceAccuracy(List<Document> documents, String expectedSource) {
+        return documents.stream()
+            .anyMatch(document -> {
+                Object sourceName = document.getMetadata().get("file_name");
                 if (sourceName == null) {
-                    sourceName = c.textSegment().metadata().getString("source");
+                    sourceName = document.getMetadata().get("source");
                 }
-                return sourceName != null && sourceName.contains(expectedSource);
+                return sourceName != null && sourceName.toString().contains(expectedSource);
             });
+    }
+
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
     }
 }

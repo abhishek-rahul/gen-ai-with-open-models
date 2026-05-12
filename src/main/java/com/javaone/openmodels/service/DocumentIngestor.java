@@ -1,51 +1,64 @@
 package com.javaone.openmodels.service;
 
-import dev.langchain4j.data.document.Document;
-import dev.langchain4j.data.document.loader.FileSystemDocumentLoader;
-import dev.langchain4j.data.document.splitter.DocumentSplitters;
-import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
+import org.springframework.ai.document.Document;
+import org.springframework.ai.reader.TextReader;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class DocumentIngestor {
 
-    private final EmbeddingModel embeddingModel;
-    private final EmbeddingStore<TextSegment> embeddingStore;
+    private final VectorStore vectorStore;
     private final int chunkSize;
-    private final int chunkOverlap;
 
-    public DocumentIngestor(EmbeddingModel embeddingModel,
-                            EmbeddingStore<TextSegment> embeddingStore,
-                            @Value("${rag.chunk-size}") int chunkSize,
-                            @Value("${rag.chunk-overlap}") int chunkOverlap) {
-        this.embeddingModel = embeddingModel;
-        this.embeddingStore = embeddingStore;
+    public DocumentIngestor(VectorStore vectorStore,
+                            @Value("${rag.chunk-size}") int chunkSize) {
+        this.vectorStore = vectorStore;
         this.chunkSize = chunkSize;
-        this.chunkOverlap = chunkOverlap;
     }
 
     public IngestResult ingest(Path documentsDir) {
-        // 1. Load documents
-        List<Document> documents = FileSystemDocumentLoader.loadDocuments(documentsDir);
+        List<Document> documents = loadTextDocuments(documentsDir);
 
-        // 2. Split into chunks and embed
-        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-            .documentSplitter(DocumentSplitters.recursive(chunkSize, chunkOverlap))
-            .embeddingModel(embeddingModel)
-            .embeddingStore(embeddingStore)
+        TokenTextSplitter splitter = TokenTextSplitter.builder()
+            .withChunkSize(chunkSize)
             .build();
 
-        ingestor.ingest(documents);
+        List<Document> chunks = splitter.apply(documents);
+        vectorStore.add(chunks);
 
-        return new IngestResult(documents.size(), "nomic-embed-text", "in-memory");
+        return new IngestResult(documents.size(), chunks.size(), "nomic-embed-text", "simple-in-memory");
     }
 
-    public record IngestResult(int documentsIngested, String embeddingModel, String store) {}
+    private List<Document> loadTextDocuments(Path documentsDir) {
+        try (var paths = Files.list(documentsDir)) {
+            List<Document> documents = new ArrayList<>();
+            paths
+                .filter(Files::isRegularFile)
+                .filter(path -> path.getFileName().toString().endsWith(".txt"))
+                .forEach(path -> documents.addAll(read(path)));
+            return documents;
+        }
+        catch (IOException ex) {
+            throw new IllegalStateException("Failed to read documents from " + documentsDir, ex);
+        }
+    }
+
+    private List<Document> read(Path path) {
+        TextReader reader = new TextReader(new FileSystemResource(path));
+        reader.getCustomMetadata().put("file_name", path.getFileName().toString());
+        reader.getCustomMetadata().put("source", path.toString());
+        return reader.get();
+    }
+
+    public record IngestResult(int documentsIngested, int chunksIngested, String embeddingModel, String store) {}
 }

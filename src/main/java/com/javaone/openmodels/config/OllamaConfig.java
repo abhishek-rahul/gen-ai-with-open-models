@@ -1,50 +1,39 @@
 package com.javaone.openmodels.config;
 
-import com.javaone.openmodels.service.Assistant;
-import com.javaone.openmodels.service.InventoryTools;
-import dev.langchain4j.model.chat.ChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaChatModel;
-import dev.langchain4j.service.AiServices;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor;
+import org.springframework.ai.chat.memory.ChatMemory;
+import org.springframework.ai.chat.memory.MessageWindowChatMemory;
+import org.springframework.ai.embedding.EmbeddingModel;
+import org.springframework.ai.vectorstore.SimpleVectorStore;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.time.Duration;
 
 @Configuration
 public class OllamaConfig {
 
-    @Value("${ollama.base-url}")
-    private String baseUrl;
-
-    @Value("${ollama.chat-model}")
-    private String chatModelName;
-
     @Bean
-    ChatLanguageModel chatModel() {
-        return OllamaChatModel.builder()
-            .baseUrl(baseUrl)
-            .modelName(chatModelName)
-            .temperature(0.7)
-            .timeout(Duration.ofSeconds(120))
+    ChatMemory chatMemory() {
+        return MessageWindowChatMemory.builder()
+            .maxMessages(20)
             .build();
     }
 
     @Bean
-    @Qualifier("chatAssistant")
-    Assistant chatAssistant(ChatLanguageModel chatModel) {
-        return AiServices.builder(Assistant.class)
-            .chatLanguageModel(chatModel)
+    ChatClient chatClient(ChatClient.Builder builder, ChatMemory chatMemory) {
+        return builder
+            .defaultSystem("You are a helpful assistant for a Java development team.")
+            .defaultAdvisors(
+                MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                SimpleLoggerAdvisor.builder().build()
+            )
             .build();
     }
 
     @Bean
-    @Qualifier("toolAssistant")
-    Assistant toolAssistant(ChatLanguageModel chatModel) {
-        return AiServices.builder(Assistant.class)
-            .chatLanguageModel(chatModel)
-            .tools(new InventoryTools())
-            .build();
+    VectorStore vectorStore(EmbeddingModel embeddingModel) {
+        return SimpleVectorStore.builder(embeddingModel).build();
     }
 }
