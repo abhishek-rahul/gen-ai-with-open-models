@@ -2,7 +2,7 @@ package com.javaone.openmodels.config;
 
 import com.javaone.openmodels.service.Assistant;
 import com.javaone.openmodels.service.InventoryTools;
-import dev.langchain4j.model.chat.ChatLanguageModel;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.service.AiServices;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +22,7 @@ public class OllamaConfig {
     private String chatModelName;
 
     @Bean
-    ChatLanguageModel chatModel() {
+    ChatModel chatModel() {
         return OllamaChatModel.builder()
             .baseUrl(baseUrl)
             .modelName(chatModelName)
@@ -33,17 +33,17 @@ public class OllamaConfig {
 
     @Bean
     @Qualifier("chatAssistant")
-    Assistant chatAssistant(ChatLanguageModel chatModel) {
+    Assistant chatAssistant(ChatModel chatModel) {
         return AiServices.builder(Assistant.class)
-            .chatLanguageModel(chatModel)
+            .chatModel(chatModel)
             .build();
     }
 
     @Bean
     @Qualifier("toolAssistant")
-    Assistant toolAssistant(ChatLanguageModel chatModel) {
+    Assistant toolAssistant(ChatModel chatModel) {
         return AiServices.builder(Assistant.class)
-            .chatLanguageModel(chatModel)
+            .chatModel(chatModel)
             .tools(new InventoryTools())
             .build();
     }
