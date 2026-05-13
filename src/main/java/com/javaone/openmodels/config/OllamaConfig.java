@@ -1,7 +1,8 @@
 package com.javaone.openmodels.config;
 
 import com.javaone.openmodels.service.Assistant;
-import com.javaone.openmodels.service.InventoryTools;
+import com.javaone.openmodels.service.CommerceSupportTools;
+import com.javaone.openmodels.service.ToolCallingAssistant;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.service.AiServices;
@@ -41,10 +42,10 @@ public class OllamaConfig {
 
     @Bean
     @Qualifier("toolAssistant")
-    Assistant toolAssistant(ChatLanguageModel chatModel) {
-        return AiServices.builder(Assistant.class)
+    ToolCallingAssistant toolAssistant(ChatLanguageModel chatModel, CommerceSupportTools commerceSupportTools) {
+        return AiServices.builder(ToolCallingAssistant.class)
             .chatLanguageModel(chatModel)
-            .tools(new InventoryTools())
+            .tools(commerceSupportTools)
             .build();
     }
 }

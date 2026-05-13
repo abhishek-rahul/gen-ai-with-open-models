@@ -38,9 +38,40 @@ Chat with the model:
 curl "http://localhost:8080/chat?message=What+is+the+Java+record+keyword?"
 ```
 
-Tool calling (inventory lookup — uses `/chat/tools` endpoint):
+Normal chat does not have access to business tools:
 ```bash
-curl "http://localhost:8080/chat/tools?message=How+many+units+of+JDK-21+do+we+have+in+stock?"
+curl "http://localhost:8080/chat?message=What+is+the+status+of+order+ORD-1001?"
+```
+
+Tool calling uses `/chat/tools`. The LLM decides when to call a Java method, LangChain4j executes it, and the tool result is sent back to the LLM for the final answer:
+```bash
+curl "http://localhost:8080/chat/tools?message=What+is+the+status+of+order+ORD-1001?"
+```
+
+Refund policy tool:
+```bash
+curl "http://localhost:8080/chat/tools?message=Can+I+refund+a+workshop+pass?"
+```
+
+Weather/API-style tool:
+```bash
+curl "http://localhost:8080/chat/tools?message=What+is+the+weather+in+Bangalore+today?"
+```
+
+Tool error handling:
+```bash
+curl "http://localhost:8080/chat/tools?message=What+is+the+status+of+order+ORD-9999?"
+```
+
+Tool schema design:
+```bash
+curl "http://localhost:8080/tools/schema"
+```
+
+Tool call audit log:
+```bash
+curl "http://localhost:8080/tools/audit"
+curl -X DELETE "http://localhost:8080/tools/audit"
 ```
 
 To swap models, change `ollama.chat-model` in `src/main/resources/application.yml` to `mistral:7b` and restart.
@@ -80,8 +111,8 @@ curl -X POST "http://localhost:8080/evaluate"
     │   └── RagController.java         # POST /ingest, GET /ask, POST /evaluate
     └── service/
         ├── Assistant.java             # AI Service interface
+        ├── CommerceSupportTools.java  # @Tool examples for Demo 1
         ├── DocumentIngestor.java      # Document loading, splitting, embedding
-        ├── InventoryTools.java        # @Tool example for Demo 1
         └── RagEvaluator.java          # Golden test set evaluation
 ```
 
@@ -91,6 +122,9 @@ curl -X POST "http://localhost:8080/evaluate"
 |--------|------|-------------|
 | GET | `/chat?message=...` | Chat with LLM (Demo 1) |
 | GET | `/chat/tools?message=...` | Chat with tool calling (Demo 1) |
+| GET | `/tools/schema` | Inspect tool names, descriptions, and parameters |
+| GET | `/tools/audit` | Inspect executed tool calls and errors |
+| DELETE | `/tools/audit` | Clear the in-memory tool call audit log |
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
@@ -99,3 +133,4 @@ curl -X POST "http://localhost:8080/evaluate"
 
 - [Demo 1: Local Inference with Ollama + LangChain4j](JavaOne_Demo1_Local_Inference_Ollama_LangChain4j.md)
 - [Demo 2: RAG Pipeline with Quality Evaluation](JavaOne_Demo2_RAG_Pipeline_Evaluation.md)
+- [Demo 3: Tool Calling / Function Calling](JavaOne_Demo3_Tool_Calling_Function_Calling.md)
