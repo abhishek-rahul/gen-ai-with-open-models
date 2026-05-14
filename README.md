@@ -62,6 +62,27 @@ curl "http://localhost:8080/ask?question=What+are+virtual+threads+in+Java+21?"
 curl -X POST "http://localhost:8080/evaluate"
 ```
 
+## Demo 3: LangGraph-Style Stateful Workflow
+
+Run a controlled graph workflow with START/END, planner, retriever, optional tool node, executor, validator, retry handling, and checkpointed state:
+
+```bash
+curl "http://localhost:8080/langgraph/run?sessionId=demo&message=How+many+units+of+SKU+JDK-21+are+in+stock?"
+```
+
+Inspect persisted graph state:
+
+```bash
+curl "http://localhost:8080/langgraph/state?sessionId=demo"
+```
+
+Human-in-the-loop approval gate:
+
+```bash
+curl "http://localhost:8080/langgraph/run?sessionId=ops&message=Deploy+the+new+payment+workflow"
+curl "http://localhost:8080/langgraph/run?sessionId=ops&message=Deploy+the+new+payment+workflow&approved=true"
+```
+
 ## Project Structure
 
 ```
@@ -94,6 +115,8 @@ curl -X POST "http://localhost:8080/evaluate"
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
+| GET | `/langgraph/run?message=...&sessionId=...&approved=false` | Run LangGraph-style workflow (Demo 3) |
+| GET | `/langgraph/state?sessionId=...` | Inspect checkpointed workflow state (Demo 3) |
 
 ## Demo Script References
 
