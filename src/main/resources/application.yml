@@ -18,3 +18,7 @@ rag:
   chunk-overlap: 50
   max-results: 5
   min-score: 0.7
+
+# Manual agent loop configuration
+agent:
+  max-steps: 5
