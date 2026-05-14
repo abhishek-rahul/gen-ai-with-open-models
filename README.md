@@ -62,6 +62,40 @@ curl "http://localhost:8080/ask?question=What+are+virtual+threads+in+Java+21?"
 curl -X POST "http://localhost:8080/evaluate"
 ```
 
+## Demo 3: LangChain Concepts
+
+Why LangChain, productivity, and abstraction risk:
+```bash
+curl "http://localhost:8080/langchain/why"
+```
+
+Raw model call vs LangChain4j AI Service:
+```bash
+curl "http://localhost:8080/langchain/raw-vs-framework?message=Explain+LangChain+in+Java"
+```
+
+Prompt template plus chain-style prompt -> model -> parser flow:
+```bash
+curl "http://localhost:8080/langchain/prompt-chain?question=Why+use+prompt+templates?"
+```
+
+Tool integration:
+```bash
+curl "http://localhost:8080/langchain/tools?sku=JDK-21"
+```
+
+Memory integration:
+```bash
+curl -X POST "http://localhost:8080/langchain/memory?conversationId=demo&message=My+name+is+Amit"
+curl -X POST "http://localhost:8080/langchain/memory?conversationId=demo&message=What+is+my+name?"
+```
+
+RAG chain internals:
+```bash
+curl "http://localhost:8080/langchain/rag-chain?question=What+are+virtual+threads?"
+curl "http://localhost:8080/langchain/internals"
+```
+
 ## Project Structure
 
 ```
@@ -94,6 +128,13 @@ curl -X POST "http://localhost:8080/evaluate"
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
+| GET | `/langchain/why` | Why LangChain, risks, productivity |
+| GET | `/langchain/raw-vs-framework?message=...` | Raw ChatModel call vs AI Service |
+| GET | `/langchain/prompt-chain?question=...` | Prompt template, chain, output parser |
+| GET | `/langchain/tools?sku=...` | Tool integration demo |
+| POST | `/langchain/memory?conversationId=...&message=...` | Memory/chat history demo |
+| GET | `/langchain/rag-chain?question=...` | Explicit RAG chain demo |
+| GET | `/langchain/internals` | LangChain internals map |
 
 ## Demo Script References
 
