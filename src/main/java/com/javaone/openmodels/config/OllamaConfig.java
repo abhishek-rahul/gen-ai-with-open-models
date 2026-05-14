@@ -2,6 +2,8 @@ package com.javaone.openmodels.config;
 
 import com.javaone.openmodels.service.Assistant;
 import com.javaone.openmodels.service.InventoryTools;
+import com.javaone.openmodels.service.MemoryAssistant;
+import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.service.AiServices;
@@ -23,6 +25,8 @@ public class OllamaConfig {
 
     @Bean
     ChatLanguageModel chatModel() {
+        // [ 9. LLM / ChatModel: this is the model adapter; swap Ollama with OpenAI, Gemini, Claude, or another provider here. ]
+        // [ 20. Callbacks / Streaming: production apps can add listeners/streaming models around this layer for logs and token streaming. ]
         return OllamaChatModel.builder()
             .baseUrl(baseUrl)
             .modelName(chatModelName)
@@ -34,6 +38,7 @@ public class OllamaConfig {
     @Bean
     @Qualifier("chatAssistant")
     Assistant chatAssistant(ChatLanguageModel chatModel) {
+        // [ 22. Framework productivity: AiServices removes manual request/response plumbing for common model calls. ]
         return AiServices.builder(Assistant.class)
             .chatLanguageModel(chatModel)
             .build();
@@ -42,9 +47,24 @@ public class OllamaConfig {
     @Bean
     @Qualifier("toolAssistant")
     Assistant toolAssistant(ChatLanguageModel chatModel) {
+        // [ 14. Agents: LangChain4j lets the model decide when the declared tool is useful for a user request. ]
+        // [ 6. Tool integration: InventoryTools exposes Java methods as callable LLM tools. ]
         return AiServices.builder(Assistant.class)
             .chatLanguageModel(chatModel)
             .tools(new InventoryTools())
+            .build();
+    }
+
+    @Bean
+    @Qualifier("memoryAssistant")
+    MemoryAssistant memoryAssistant(ChatLanguageModel chatModel) {
+        // [ 15. Memory / Chat History: each memory id gets a rolling window of previous messages. ]
+        return AiServices.builder(MemoryAssistant.class)
+            .chatLanguageModel(chatModel)
+            .chatMemoryProvider(memoryId -> MessageWindowChatMemory.builder()
+                .id(memoryId)
+                .maxMessages(10)
+                .build())
             .build();
     }
 }

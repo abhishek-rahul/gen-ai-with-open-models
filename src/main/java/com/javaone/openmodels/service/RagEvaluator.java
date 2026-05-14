@@ -57,22 +57,23 @@ public class RagEvaluator {
 
         for (EvalCase tc : testSet) {
             long start = System.currentTimeMillis();
+            // [ 5. RAG chain: the assistant answers with context retrieved from the vector store. ]
             String answer = ragAssistant.chat(tc.question());
             long latency = System.currentTimeMillis() - start;
 
-            // Retrieve the context that was used
+            // [ 8. LangChain internals: retrieve() exposes what the RAG layer selected before the LLM call. ]
             List<Content> retrievedContents = contentRetriever.retrieve(new Query(tc.question()));
 
-            // Simple faithfulness: does the answer contain key terms from the expected answer?
+            // [ 22. Framework productivity: evaluation can sit beside the chain and catch retrieval/answer regressions. ]
             double faithfulness = computeFaithfulness(answer, tc.expectedAnswer());
 
-            // Simple relevance: does the answer address the question?
+            // [ 12. Output Parsers: this demo returns a Map so API clients get structured evaluation output. ]
             double relevance = computeRelevance(answer, tc.question());
 
-            // Context precision: are the retrieved chunks relevant?
+            // [ 16. RAG: context precision checks whether retrieved chunks are actually relevant. ]
             double contextPrecision = computeContextPrecision(retrievedContents, tc.question());
 
-            // Source accuracy: did the right source get retrieved?
+            // [ 17. Document Loaders: source metadata from loaded files helps validate citation/source accuracy. ]
             boolean correctSource = checkSourceAccuracy(retrievedContents, tc.expectedSource());
 
             totalFaithfulness += faithfulness;

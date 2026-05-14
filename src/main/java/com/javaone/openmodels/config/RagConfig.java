@@ -32,6 +32,7 @@ public class RagConfig {
 
     @Bean
     EmbeddingModel embeddingModel() {
+        // [ 19. Embeddings: text chunks are converted into vectors for similarity search. ]
         return OllamaEmbeddingModel.builder()
             .baseUrl(baseUrl)
             .modelName(embeddingModelName)
@@ -40,12 +41,14 @@ public class RagConfig {
 
     @Bean
     EmbeddingStore<TextSegment> embeddingStore() {
+        // [ 18. Vector Stores: in-memory is demo-friendly; FAISS, Chroma, Pinecone, Weaviate, and Qdrant fit this role in production. ]
         return new InMemoryEmbeddingStore<>();
     }
 
     @Bean
     ContentRetriever contentRetriever(EmbeddingStore<TextSegment> store,
                                       EmbeddingModel model) {
+        // [ 16. RAG: retriever searches the vector store and sends the best matching chunks to the LLM. ]
         return EmbeddingStoreContentRetriever.builder()
             .embeddingStore(store)
             .embeddingModel(model)
@@ -58,6 +61,7 @@ public class RagConfig {
     @Qualifier("ragAssistant")
     Assistant ragAssistant(ChatLanguageModel chatModel,
                            ContentRetriever retriever) {
+        // [ 5. RAG chain: AiServices wires retriever -> prompt augmentation -> ChatModel answer. ]
         return AiServices.builder(Assistant.class)
             .chatLanguageModel(chatModel)
             .contentRetriever(retriever)
