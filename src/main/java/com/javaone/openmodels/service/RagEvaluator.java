@@ -57,23 +57,23 @@ public class RagEvaluator {
 
         for (EvalCase tc : testSet) {
             long start = System.currentTimeMillis();
-            // [ RAG chain: the assistant answers with context retrieved from the vector store. ]
+            // [ 5. RAG chain: the assistant answers with context retrieved from the vector store. ]
             String answer = ragAssistant.chat(tc.question());
             long latency = System.currentTimeMillis() - start;
 
-            // [ LangChain internals: retrieve() exposes what the RAG layer selected before the LLM call. ]
+            // [ 8. LangChain internals: retrieve() exposes what the RAG layer selected before the LLM call. ]
             List<Content> retrievedContents = contentRetriever.retrieve(new Query(tc.question()));
 
-            // [ Framework productivity: evaluation can sit beside the chain and catch retrieval/answer regressions. ]
+            // [ 22. Framework productivity: evaluation can sit beside the chain and catch retrieval/answer regressions. ]
             double faithfulness = computeFaithfulness(answer, tc.expectedAnswer());
 
-            // [ Output Parsers: this demo returns a Map so API clients get structured evaluation output. ]
+            // [ 12. Output Parsers: this demo returns a Map so API clients get structured evaluation output. ]
             double relevance = computeRelevance(answer, tc.question());
 
-            // [ RAG: context precision checks whether retrieved chunks are actually relevant. ]
+            // [ 16. RAG: context precision checks whether retrieved chunks are actually relevant. ]
             double contextPrecision = computeContextPrecision(retrievedContents, tc.question());
 
-            // [ Document Loaders: source metadata from loaded files helps validate citation/source accuracy. ]
+            // [ 17. Document Loaders: source metadata from loaded files helps validate citation/source accuracy. ]
             boolean correctSource = checkSourceAccuracy(retrievedContents, tc.expectedSource());
 
             totalFaithfulness += faithfulness;

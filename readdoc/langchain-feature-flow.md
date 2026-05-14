@@ -485,7 +485,7 @@ Includes:
 Code me comments is style me add kiye gaye hain:
 
 ```java
-// [ RAG chain: question -> retriever -> context augmented prompt -> LLM answer. ]
+// [ 5. RAG chain: question -> retriever -> context augmented prompt -> LLM answer. ]
 ```
 
 Purpose:

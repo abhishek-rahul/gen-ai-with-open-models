@@ -365,11 +365,11 @@ Expected:
 Output me comments milne chahiye like:
 
 ```text
-[ LLM / ChatModel: ... ]
-[ PromptTemplate: ... ]
-[ Tools: ... ]
-[ Memory / Chat History: ... ]
-[ RAG chain: ... ]
+[ 9. LLM / ChatModel: ... ]
+[ 10. PromptTemplate: ... ]
+[ 13. Tools: ... ]
+[ 15. Memory / Chat History: ... ]
+[ 5. RAG chain: ... ]
 ```
 
 ## 17. Common Issues

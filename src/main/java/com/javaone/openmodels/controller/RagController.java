@@ -30,7 +30,7 @@ public class RagController {
 
     @PostMapping("/ingest")
     public Map<String, Object> ingest() {
-        // [ RAG: this endpoint prepares the vector database before question answering. ]
+        // [ 16. RAG: this endpoint prepares the vector database before question answering. ]
         DocumentIngestor.IngestResult result = documentIngestor.ingest(Path.of(docsDir));
         return Map.of(
             "status", "success",
@@ -43,7 +43,7 @@ public class RagController {
     @GetMapping("/ask")
     public Map<String, Object> ask(@RequestParam String question) {
         long start = System.currentTimeMillis();
-        // [ RAG chain: question -> retriever -> context augmented prompt -> LLM answer. ]
+        // [ 5. RAG chain: question -> retriever -> context augmented prompt -> LLM answer. ]
         String answer = ragAssistant.chat(question);
         long latency = System.currentTimeMillis() - start;
 
@@ -56,7 +56,7 @@ public class RagController {
 
     @PostMapping("/evaluate")
     public Map<String, Object> evaluate() {
-        // [ LangChain abstraction risk: evaluation makes hidden retrieval/model behavior visible. ]
+        // [ 21. LangChain abstraction risk: evaluation makes hidden retrieval/model behavior visible. ]
         return ragEvaluator.evaluate();
     }
 }

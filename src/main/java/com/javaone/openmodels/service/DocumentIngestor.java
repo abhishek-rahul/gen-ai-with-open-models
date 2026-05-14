@@ -32,11 +32,11 @@ public class DocumentIngestor {
     }
 
     public IngestResult ingest(Path documentsDir) {
-        // [ Document Loaders: FileSystemDocumentLoader loads docs; PDF, CSV, web, Notion, and Drive loaders follow the same pattern. ]
+        // [ 17. Document Loaders: FileSystemDocumentLoader loads docs; PDF, CSV, web, Notion, and Drive loaders follow the same pattern. ]
         List<Document> documents = FileSystemDocumentLoader.loadDocuments(documentsDir);
 
-        // [ RAG: loaders -> splitters -> embeddings -> vector DB -> retriever -> LLM. ]
-        // [ Embeddings: each split TextSegment is embedded before it is stored. ]
+        // [ 16. RAG: loaders -> splitters -> embeddings -> vector DB -> retriever -> LLM. ]
+        // [ 19. Embeddings: each split TextSegment is embedded before it is stored. ]
         EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
             .documentSplitter(DocumentSplitters.recursive(chunkSize, chunkOverlap))
             .embeddingModel(embeddingModel)

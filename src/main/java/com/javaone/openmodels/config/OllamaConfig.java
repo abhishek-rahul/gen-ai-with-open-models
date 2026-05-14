@@ -25,8 +25,8 @@ public class OllamaConfig {
 
     @Bean
     ChatLanguageModel chatModel() {
-        // [ LLM / ChatModel: this is the model adapter; swap Ollama with OpenAI, Gemini, Claude, or another provider here. ]
-        // [ Callbacks / Streaming: production apps can add listeners/streaming models around this layer for logs and token streaming. ]
+        // [ 9. LLM / ChatModel: this is the model adapter; swap Ollama with OpenAI, Gemini, Claude, or another provider here. ]
+        // [ 20. Callbacks / Streaming: production apps can add listeners/streaming models around this layer for logs and token streaming. ]
         return OllamaChatModel.builder()
             .baseUrl(baseUrl)
             .modelName(chatModelName)
@@ -38,7 +38,7 @@ public class OllamaConfig {
     @Bean
     @Qualifier("chatAssistant")
     Assistant chatAssistant(ChatLanguageModel chatModel) {
-        // [ Framework productivity: AiServices removes manual request/response plumbing for common model calls. ]
+        // [ 22. Framework productivity: AiServices removes manual request/response plumbing for common model calls. ]
         return AiServices.builder(Assistant.class)
             .chatLanguageModel(chatModel)
             .build();
@@ -47,8 +47,8 @@ public class OllamaConfig {
     @Bean
     @Qualifier("toolAssistant")
     Assistant toolAssistant(ChatLanguageModel chatModel) {
-        // [ Agents: LangChain4j lets the model decide when the declared tool is useful for a user request. ]
-        // [ Tool integration: InventoryTools exposes Java methods as callable LLM tools. ]
+        // [ 14. Agents: LangChain4j lets the model decide when the declared tool is useful for a user request. ]
+        // [ 6. Tool integration: InventoryTools exposes Java methods as callable LLM tools. ]
         return AiServices.builder(Assistant.class)
             .chatLanguageModel(chatModel)
             .tools(new InventoryTools())
@@ -58,7 +58,7 @@ public class OllamaConfig {
     @Bean
     @Qualifier("memoryAssistant")
     MemoryAssistant memoryAssistant(ChatLanguageModel chatModel) {
-        // [ Memory / Chat History: each memory id gets a rolling window of previous messages. ]
+        // [ 15. Memory / Chat History: each memory id gets a rolling window of previous messages. ]
         return AiServices.builder(MemoryAssistant.class)
             .chatLanguageModel(chatModel)
             .chatMemoryProvider(memoryId -> MessageWindowChatMemory.builder()

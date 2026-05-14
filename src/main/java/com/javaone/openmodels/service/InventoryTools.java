@@ -9,7 +9,7 @@ public class InventoryTools {
 
     @Tool("Look up current stock level for a product by SKU")
     public String checkStock(@P("Product SKU") String sku) {
-        // [ Tools: this Java method is exposed to the LLM as an external function. ]
+        // [ 13. Tools: this Java method is exposed to the LLM as an external function. ]
         Map<String, Integer> inventory = Map.of(
             "JDK-21", 150, "MVN-4", 89, "GRAAL-22", 12 , "jdk-21", 151
         );

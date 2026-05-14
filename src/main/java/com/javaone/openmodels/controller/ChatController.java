@@ -20,13 +20,13 @@ public class ChatController {
 
     @GetMapping("/chat")
     public String chat(@RequestParam String message) {
-        // [ Raw implementation vs LangChain: controller calls a typed assistant instead of hand-building HTTP requests. ]
+        // [ 2. Raw implementation vs LangChain: controller calls a typed assistant instead of hand-building HTTP requests. ]
         return chatAssistant.chat(message);
     }
 
     @GetMapping("/chat/tools")
     public String chatWithTools(@RequestParam String message) {
-        // [ Tool integration: the assistant can call InventoryTools when the message requires inventory data. ]
+        // [ 6. Tool integration: the assistant can call InventoryTools when the message requires inventory data. ]
         return toolAssistant.chat(message);
     }
 }

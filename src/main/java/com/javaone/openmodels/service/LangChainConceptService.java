@@ -33,9 +33,9 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> whyLangChain() {
-        // [ LangChain kyun use hota hai: repeated GenAI plumbing becomes reusable application components. ]
-        // [ Framework productivity: prompt, model, parser, tools, memory, and RAG can be wired declaratively. ]
-        // [ LangChain abstraction risk: convenience can hide model behavior, latency, token cost, and version changes. ]
+        // [ 1. LangChain kyun use hota hai: repeated GenAI plumbing becomes reusable application components. ]
+        // [ 22. Framework productivity: prompt, model, parser, tools, memory, and RAG can be wired declaratively. ]
+        // [ 21. LangChain abstraction risk: convenience can hide model behavior, latency, token cost, and version changes. ]
         return Map.of(
             "why_use_langchain", List.of(
                 "Models ko application workflows se connect karna easy hota hai.",
@@ -52,10 +52,10 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> rawVsLangChain(String message) {
-        // [ Raw implementation vs LangChain: raw call directly invokes the model with one prompt string. ]
+        // [ 2. Raw implementation vs LangChain: raw call directly invokes the model with one prompt string. ]
         String raw = chatModel.chat(message);
 
-        // [ Chains: AiServices wraps model calls behind an application interface. ]
+        // [ 4. Chains: AiServices wraps model calls behind an application interface. ]
         String langChain = chatAssistant.chat(message);
 
         return Map.of(
@@ -65,7 +65,7 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> promptTemplateChain(String role, String topic, String question) {
-        // [ PromptTemplate: dynamic prompt text is rendered from variables role/topic/question. ]
+        // [ 10. PromptTemplate: dynamic prompt text is rendered from variables role/topic/question. ]
         PromptTemplate template = PromptTemplate.from("""
             You are a {{role}}.
             Answer about {{topic}} for Java developers.
@@ -78,10 +78,10 @@ public class LangChainConceptService {
             "question", question
         )).text();
 
-        // [ Chains / LCEL: this Java chain mirrors prompt | model | parser as prompt -> model -> String output. ]
+        // [ 11. Chains / LCEL: this Java chain mirrors prompt | model | parser as prompt -> model -> String output. ]
         String chainAnswer = chatModel.chat(renderedPrompt);
 
-        // [ Output Parsers: AiServices can parse model text into Java collections. ]
+        // [ 12. Output Parsers: AiServices can parse model text into Java collections. ]
         List<String> parsedLearningPoints = chatAssistant.threeLearningPoints(topic);
 
         return Map.of(
@@ -93,13 +93,13 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> toolIntegration(String sku) {
-        // [ Tools: the assistant may call InventoryTools.checkStock instead of answering from model memory. ]
+        // [ 13. Tools: the assistant may call InventoryTools.checkStock instead of answering from model memory. ]
         String answer = toolAssistant.chat("Check inventory for SKU " + sku);
         return Map.of("sku", sku, "answer", answer);
     }
 
     public Map<String, Object> memoryIntegration(String conversationId, String message) {
-        // [ Memory integration: same conversation id reuses prior chat history from MessageWindowChatMemory. ]
+        // [ 7. Memory integration: same conversation id reuses prior chat history from MessageWindowChatMemory. ]
         String answer = memoryAssistant.chatWithMemory(conversationId, message);
         return Map.of(
             "conversation_id", conversationId,
@@ -108,7 +108,7 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> ragChain(String question) {
-        // [ RAG chain: retriever finds relevant document chunks before the LLM answers. ]
+        // [ 5. RAG chain: retriever finds relevant document chunks before the LLM answers. ]
         List<Content> contexts = contentRetriever.retrieve(new Query(question));
         String answer = chatAssistant.chat("""
             Answer using the provided context. If context is not enough, say what is missing.
@@ -128,7 +128,7 @@ public class LangChainConceptService {
     }
 
     public Map<String, Object> internals() {
-        // [ LangChain internals: these are the building blocks used in this branch. ]
+        // [ 8. LangChain internals: these are the building blocks used in this branch. ]
         return Map.ofEntries(
             Map.entry("LLM / ChatModel", "ChatLanguageModel calls Ollama today; the same role can be OpenAI, Gemini, Claude, or local models."),
             Map.entry("PromptTemplate", "Dynamic prompts use variables like: You are a {role}. Answer about {topic}."),
