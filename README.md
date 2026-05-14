@@ -62,6 +62,20 @@ curl "http://localhost:8080/ask?question=What+are+virtual+threads+in+Java+21?"
 curl -X POST "http://localhost:8080/evaluate"
 ```
 
+## Demo 3: Agents + Manual ReAct Loop
+
+Review the agent concepts covered by the demo:
+```bash
+curl "http://localhost:8080/agents/concepts"
+```
+
+Run a manual Reason -> Act -> Observe agent loop:
+```bash
+curl -X POST "http://localhost:8080/agents/run?goal=Check+stock+for+JDK-21+and+explain+what+the+agent+did"
+```
+
+The response includes the trace for each step: the model thought, selected tool, tool input, observation, final answer, and stopping condition. The loop is protected by `agent.max-steps` and repeated-action detection to avoid infinite loops.
+
 ## Project Structure
 
 ```
@@ -94,6 +108,8 @@ curl -X POST "http://localhost:8080/evaluate"
 | POST | `/ingest` | Ingest docs into vector store (Demo 2) |
 | GET | `/ask?question=...` | RAG query (Demo 2) |
 | POST | `/evaluate` | Run eval test set (Demo 2) |
+| GET | `/agents/concepts` | Explain agent concepts (Demo 3) |
+| POST | `/agents/run?goal=...` | Run manual ReAct agent loop with trace (Demo 3) |
 
 ## Demo Script References
 
